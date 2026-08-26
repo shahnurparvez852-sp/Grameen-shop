@@ -6,7 +6,14 @@ function render(){
  let a=products.filter(p=>(cat==="All"||p.category===cat)&&(!q||p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)));
  let s=document.getElementById("sort").value;if(s==="low")a.sort((x,y)=>x.price-y.price);if(s==="high")a.sort((x,y)=>y.price-x.price);
  document.getElementById("cats").innerHTML=["All",...new Set(products.map(p=>p.category))].map(x=>`<button class="pill ${x===cat?"active":""}" onclick="cat='${x}';render()">${x}</button>`).join("");
- document.getElementById("grid").innerHTML=a.map(p=>`<article class="card"><div class="pic">${p.icon}<span>${p.stock} left</span></div><small>${p.category}</small><h3>${p.name}</h3><b>${money(p.price)}</b> <del>${p.old_price?money(p.old_price):""}</del><button class="add" ${p.stock<1?"disabled":""} onclick="add(${p.id})">${p.stock<1?"Out of stock":"Add to cart"}</button></article>`).join("");
+ document.getElementById("grid").innerHTML=a.map(p=>`<article class="card"><div class="pic">
+  ${
+    p.icon && p.icon.startsWith("data:image")
+      ? `<img src="${p.icon}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`
+      : `<span class="product-icon">${p.icon}</span>`
+  }
+  <span>${p.stock} left</span>
+</div>
 }
 function add(id){let x=cart.find(i=>i.id===id);if(x)x.qty++;else cart.push({id,qty:1});save();openCart()}
 function save(){localStorage.setItem("cart",JSON.stringify(cart));update()}
