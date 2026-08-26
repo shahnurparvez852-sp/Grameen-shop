@@ -1652,3 +1652,37 @@ textarea:focus-visible{
   background:var(--purple);
   color:white;
 }
+/* =========================
+   FEATURED PRODUCTS CENTER
+   ========================= */
+
+.section-heading{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:15px;
+}
+
+.section-heading > div{
+  width:100%;
+}
+
+.section-heading small{
+  display:block;
+  margin-bottom:8px;
+}
+
+.section-heading h2{
+  margin:7px 0;
+}
+
+.section-subtitle{
+  margin:10px auto 0;
+  text-align:center;
+}
+
+#sort{
+  margin-top:5px;
+}
