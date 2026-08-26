@@ -1686,3 +1686,120 @@ textarea:focus-visible{
 #sort{
   margin-top:5px;
 }
+/* =========================
+   PRODUCT IMAGE FIX
+   ========================= */
+
+.card .pic{
+  position:relative;
+  width:100%;
+  height:250px;
+  overflow:hidden;
+  background:#f4f2f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Product image */
+.card .pic img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover;
+  display:block;
+  margin:0;
+  padding:0;
+}
+
+/* Image-এর ওপর stock লেখা সুন্দরভাবে */
+.card .pic > span:last-child{
+  position:absolute;
+  right:10px;
+  top:10px;
+
+  padding:5px 10px;
+
+  border-radius:20px;
+
+  background:rgba(255,255,255,.92);
+  color:var(--green);
+
+  font-size:12px;
+  font-weight:800;
+
+  z-index:2;
+}
+
+/* Product information image-এর নিচে থাকবে */
+.card > small{
+  display:block;
+  margin:16px 20px 5px;
+  color:var(--purple);
+  font-weight:800;
+}
+
+.card > h3{
+  margin:0 20px 8px !important;
+}
+
+.card > b{
+  display:inline-block;
+  margin-left:20px;
+  color:var(--green);
+  font-size:20px;
+}
+
+.card > del{
+  color:#999;
+  margin-left:6px;
+}
+
+/* Add to cart button */
+.card .add{
+  display:block;
+  width:calc(100% - 40px);
+  margin:18px 20px 20px;
+  padding:13px;
+
+  border:0;
+  border-radius:12px;
+
+  background:linear-gradient(
+    135deg,
+    var(--purple),
+    var(--purple-dark)
+  );
+
+  color:white;
+  font-weight:800;
+  cursor:pointer;
+
+  transition:.25s ease;
+}
+
+.card .add:hover{
+  transform:translateY(-2px);
+}
+
+.card .add:disabled{
+  background:#aaa;
+  cursor:not-allowed;
+}
+
+
+/* Mobile */
+@media(max-width:750px){
+
+  .card .pic{
+    height:190px;
+  }
+
+}
+
+@media(max-width:450px){
+
+  .card .pic{
+    height:230px;
+  }
+
+}
