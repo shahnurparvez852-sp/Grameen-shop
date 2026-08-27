@@ -4,25 +4,23 @@ const Database = require("better-sqlite3");
 const path = require("path");
 
 const app = express();
+
 const db = new Database("store.db");
 
 const PORT = process.env.PORT || 3000;
 
 
 /* =====================================================
-   PAYMENT SETTINGS
-   ===================================================== */
-
-const BKASH_NUMBER = "01312376687";
-const NAGAD_NUMBER = "01728376687";
-
-
-/* =====================================================
    MIDDLEWARE
-   ===================================================== */
+===================================================== */
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
 
 app.use(
   session({
@@ -50,65 +48,63 @@ app.use(
 
 /* =====================================================
    DATABASE
-   ===================================================== */
+===================================================== */
 
 db.exec(`
+
 CREATE TABLE IF NOT EXISTS products(
+
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+
   name TEXT NOT NULL,
+
   category TEXT NOT NULL,
+
   price INTEGER NOT NULL,
+
   old_price INTEGER DEFAULT 0,
+
   icon TEXT DEFAULT '🛍️',
+
   stock INTEGER DEFAULT 0,
+
   active INTEGER DEFAULT 1,
+
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
+
 );
 
+
 CREATE TABLE IF NOT EXISTS orders(
+
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+
   customer_name TEXT NOT NULL,
+
   phone TEXT NOT NULL,
+
   address TEXT NOT NULL,
+
   payment TEXT NOT NULL,
+
   note TEXT,
-  transaction_id TEXT DEFAULT '',
+
   items_json TEXT NOT NULL,
+
   total INTEGER NOT NULL,
+
   status TEXT DEFAULT 'Pending',
+
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
+
 );
+
 `);
 
 
 /* =====================================================
-   DATABASE MIGRATION
-   For old store.db files
-   ===================================================== */
-
-const orderColumns = db
-  .prepare("PRAGMA table_info(orders)")
-  .all();
-
-const hasTransactionId =
-  orderColumns.some(
-    column => column.name === "transaction_id"
-  );
-
-
-if (!hasTransactionId) {
-
-  db.exec(`
-    ALTER TABLE orders
-    ADD COLUMN transaction_id TEXT DEFAULT ''
-  `);
-
-}
-
-
-/* =====================================================
    DEFAULT PRODUCTS
-   ===================================================== */
+===================================================== */
 
 const count =
   db
@@ -136,6 +132,7 @@ if (!count) {
 
 
   [
+
     [
       "Classic Oversized T-Shirt",
       "Fashion",
@@ -208,16 +205,18 @@ if (!count) {
       14
     ]
 
-  ].forEach(
-    x => add.run(...x)
-  );
+  ].forEach(x => {
+
+    add.run(...x);
+
+  });
 
 }
 
 
 /* =====================================================
    MONEY
-   ===================================================== */
+===================================================== */
 
 const money = n =>
   "৳" +
@@ -226,7 +225,7 @@ const money = n =>
 
 /* =====================================================
    PRODUCTS
-   ===================================================== */
+===================================================== */
 
 app.get(
   "/api/products",
@@ -250,25 +249,8 @@ app.get(
 
 
 /* =====================================================
-   PAYMENT INFO
-   ===================================================== */
-
-app.get(
-  "/api/payment-info",
-  (req, res) => {
-
-    res.json({
-      bkash: BKASH_NUMBER,
-      nagad: NAGAD_NUMBER
-    });
-
-  }
-);
-
-
-/* =====================================================
    CREATE ORDER
-   ===================================================== */
+===================================================== */
 
 app.post(
   "/api/orders",
@@ -280,14 +262,9 @@ app.post(
       address,
       payment,
       note,
-      transaction_id,
       items
     } = req.body;
 
-
-    /* -----------------------------------------------
-       REQUIRED FIELDS
-    ------------------------------------------------ */
 
     if (
       !customer_name ||
@@ -306,33 +283,9 @@ app.post(
     }
 
 
-    /* -----------------------------------------------
-       TRANSACTION ID REQUIRED FOR MANUAL PAYMENT
-    ------------------------------------------------ */
-
-    if (
-      (
-        payment === "bKash Manual" ||
-        payment === "Nagad Manual"
-      ) &&
-      !String(transaction_id || "").trim()
-    ) {
-
-      return res.status(400).json({
-        error:
-          "Please enter your Transaction ID."
-      });
-
-    }
-
-
-    /* -----------------------------------------------
-       NORMALIZE PRODUCTS
-    ------------------------------------------------ */
-
     let total = 0;
 
-    const normalized = [];
+    let normalized = [];
 
 
     const get =
@@ -372,8 +325,10 @@ app.post(
       if (p.stock < qty) {
 
         return res.status(400).json({
+
           error:
             `Only ${p.stock} units of ${p.name} are available.`
+
         });
 
       }
@@ -384,18 +339,23 @@ app.post(
 
 
       normalized.push({
+
         id: p.id,
+
         name: p.name,
+
         price: p.price,
+
         qty
+
       });
 
     }
 
 
-    /* -----------------------------------------------
-       SAVE ORDER + REDUCE STOCK
-    ------------------------------------------------ */
+    /* =================================================
+       DATABASE TRANSACTION
+    ================================================= */
 
     const tx =
       db.transaction(() => {
@@ -410,25 +370,29 @@ app.post(
                 address,
                 payment,
                 note,
-                transaction_id,
                 items_json,
                 total
               )
-              VALUES (?,?,?,?,?,?,?,?)
+              VALUES (?,?,?,?,?,?,?)
             `)
             .run(
+
               customer_name,
+
               phone,
+
               address,
+
               payment,
+
               note || "",
-              String(
-                transaction_id || ""
-              ).trim(),
+
               JSON.stringify(
                 normalized
               ),
+
               total
+
             );
 
 
@@ -440,13 +404,14 @@ app.post(
           `);
 
 
-        normalized.forEach(
-          i =>
-            upd.run(
-              i.qty,
-              i.id
-            )
-        );
+        normalized.forEach(i => {
+
+          upd.run(
+            i.qty,
+            i.id
+          );
+
+        });
 
 
         return info.lastInsertRowid;
@@ -457,10 +422,6 @@ app.post(
     const id = tx();
 
 
-    /* -----------------------------------------------
-       RESPONSE
-    ------------------------------------------------ */
-
     res.json({
 
       ok: true,
@@ -469,9 +430,113 @@ app.post(
 
       total,
 
-      money: money(total),
+      money: money(total)
 
-      status: "Pending"
+    });
+
+  }
+);
+
+
+/* =====================================================
+   CUSTOMER ORDER TRACKING
+===================================================== */
+
+app.get(
+  "/api/order/:id",
+  (req, res) => {
+
+    const id =
+      Number(req.params.id);
+
+
+    if (!Number.isInteger(id) || id < 1) {
+
+      return res.status(400).json({
+
+        error:
+          "Invalid Order ID."
+
+      });
+
+    }
+
+
+    const order =
+      db
+        .prepare(`
+          SELECT
+            id,
+            customer_name,
+            payment,
+            items_json,
+            total,
+            status,
+            created_at
+          FROM orders
+          WHERE id=?
+        `)
+        .get(id);
+
+
+    if (!order) {
+
+      return res.status(404).json({
+
+        error:
+          "Order not found."
+
+      });
+
+    }
+
+
+    let items = [];
+
+
+    try {
+
+      items =
+        JSON.parse(
+          order.items_json
+        );
+
+    } catch {
+
+      items = [];
+
+    }
+
+
+    res.json({
+
+      ok: true,
+
+      order: {
+
+        id: order.id,
+
+        customer_name:
+          order.customer_name,
+
+        payment:
+          order.payment,
+
+        items,
+
+        total:
+          order.total,
+
+        money:
+          money(order.total),
+
+        status:
+          order.status,
+
+        created_at:
+          order.created_at
+
+      }
 
     });
 
@@ -481,7 +546,7 @@ app.post(
 
 /* =====================================================
    ADMIN AUTH
-   ===================================================== */
+===================================================== */
 
 function admin(
   req,
@@ -489,7 +554,9 @@ function admin(
   next
 ) {
 
-  if (req.session.admin) {
+  if (
+    req.session.admin
+  ) {
 
     return next();
 
@@ -497,8 +564,10 @@ function admin(
 
 
   res.status(401).json({
+
     error:
       "Admin login required."
+
   });
 
 }
@@ -506,7 +575,7 @@ function admin(
 
 /* =====================================================
    ADMIN LOGIN
-   ===================================================== */
+===================================================== */
 
 app.post(
   "/api/admin/login",
@@ -538,8 +607,10 @@ app.post(
 
 
     res.status(401).json({
+
       error:
         "Invalid login."
+
     });
 
   }
@@ -548,17 +619,20 @@ app.post(
 
 /* =====================================================
    ADMIN LOGOUT
-   ===================================================== */
+===================================================== */
 
 app.post(
   "/api/admin/logout",
   (req, res) => {
 
     req.session.destroy(
-      () =>
+      () => {
+
         res.json({
           ok: true
-        })
+        });
+
+      }
     );
 
   }
@@ -566,16 +640,18 @@ app.post(
 
 
 /* =====================================================
-   ADMIN ME
-   ===================================================== */
+   ADMIN SESSION CHECK
+===================================================== */
 
 app.get(
   "/api/admin/me",
   (req, res) => {
 
     res.json({
+
       loggedIn:
         !!req.session.admin
+
     });
 
   }
@@ -584,7 +660,7 @@ app.get(
 
 /* =====================================================
    ADMIN ORDERS
-   ===================================================== */
+===================================================== */
 
 app.get(
   "/api/admin/orders",
@@ -598,20 +674,23 @@ app.get(
           FROM orders
           ORDER BY id DESC
         `)
-        .all()
-        .map(o => ({
-
-          ...o,
-
-          items:
-            JSON.parse(
-              o.items_json
-            )
-
-        }));
+        .all();
 
 
-    res.json(orders);
+    res.json(
+
+      orders.map(o => ({
+
+        ...o,
+
+        items:
+          JSON.parse(
+            o.items_json
+          )
+
+      }))
+
+    );
 
   }
 );
@@ -619,7 +698,7 @@ app.get(
 
 /* =====================================================
    UPDATE ORDER STATUS
-   ===================================================== */
+===================================================== */
 
 app.patch(
   "/api/admin/orders/:id",
@@ -627,12 +706,19 @@ app.patch(
   (req, res) => {
 
     const allowed = [
+
       "Pending",
+
       "Confirmed",
+
       "Packed",
+
       "Shipped",
+
       "Delivered",
+
       "Cancelled"
+
     ];
 
 
@@ -643,27 +729,52 @@ app.patch(
     ) {
 
       return res.status(400).json({
+
         error:
           "Invalid status"
+
       });
 
     }
 
 
-    db
-      .prepare(`
-        UPDATE orders
-        SET status=?
-        WHERE id=?
-      `)
-      .run(
-        req.body.status,
-        req.params.id
-      );
+    const result =
+      db
+        .prepare(`
+          UPDATE orders
+          SET status=?
+          WHERE id=?
+        `)
+        .run(
+
+          req.body.status,
+
+          req.params.id
+
+        );
+
+
+    if (
+      result.changes === 0
+    ) {
+
+      return res.status(404).json({
+
+        error:
+          "Order not found."
+
+      });
+
+    }
 
 
     res.json({
-      ok: true
+
+      ok: true,
+
+      status:
+        req.body.status
+
     });
 
   }
@@ -672,7 +783,7 @@ app.patch(
 
 /* =====================================================
    ADD PRODUCT
-   ===================================================== */
+===================================================== */
 
 app.post(
   "/api/admin/products",
@@ -696,8 +807,10 @@ app.post(
     ) {
 
       return res.status(400).json({
+
         error:
           "Name, category and price are required."
+
       });
 
     }
@@ -718,19 +831,30 @@ app.post(
           VALUES (?,?,?,?,?,?)
         `)
         .run(
+
           name,
+
           category,
-          price,
-          old_price || 0,
-          icon || "🛍️",
-          stock || 0
+
+          Number(price),
+
+          Number(old_price) || 0,
+
+          icon ||
+            "🛍️",
+
+          Number(stock) || 0
+
         );
 
 
     res.json({
+
       ok: true,
+
       id:
         r.lastInsertRowid
+
     });
 
   }
@@ -739,7 +863,7 @@ app.post(
 
 /* =====================================================
    EDIT PRODUCT
-   ===================================================== */
+===================================================== */
 
 app.patch(
   "/api/admin/products/:id",
@@ -748,25 +872,34 @@ app.patch(
 
     const p =
       db
-        .prepare(
-          "SELECT * FROM products WHERE id=?"
-        )
-        .get(req.params.id);
+        .prepare(`
+          SELECT *
+          FROM products
+          WHERE id=?
+        `)
+        .get(
+          req.params.id
+        );
 
 
     if (!p) {
 
       return res.status(404).json({
+
         error:
           "Not found"
+
       });
 
     }
 
 
     const x = {
+
       ...p,
+
       ...req.body
+
     };
 
 
@@ -784,19 +917,31 @@ app.patch(
         WHERE id=?
       `)
       .run(
+
         x.name,
+
         x.category,
-        x.price,
-        x.old_price || 0,
-        x.icon || "🛍️",
-        x.stock || 0,
+
+        Number(x.price),
+
+        Number(x.old_price) || 0,
+
+        x.icon ||
+          "🛍️",
+
+        Number(x.stock) || 0,
+
         x.active ? 1 : 0,
+
         req.params.id
+
       );
 
 
     res.json({
+
       ok: true
+
     });
 
   }
@@ -805,24 +950,43 @@ app.patch(
 
 /* =====================================================
    HIDE PRODUCT
-   ===================================================== */
+===================================================== */
 
 app.delete(
   "/api/admin/products/:id",
   admin,
   (req, res) => {
 
-    db
-      .prepare(`
-        UPDATE products
-        SET active=0
-        WHERE id=?
-      `)
-      .run(req.params.id);
+    const result =
+      db
+        .prepare(`
+          UPDATE products
+          SET active=0
+          WHERE id=?
+        `)
+        .run(
+          req.params.id
+        );
+
+
+    if (
+      result.changes === 0
+    ) {
+
+      return res.status(404).json({
+
+        error:
+          "Product not found."
+
+      });
+
+    }
 
 
     res.json({
+
       ok: true
+
     });
 
   }
@@ -831,14 +995,14 @@ app.delete(
 
 /* =====================================================
    START SERVER
-   ===================================================== */
+===================================================== */
 
 app.listen(
   PORT,
   () => {
 
     console.log(
-      `Grameen Shop running on http://localhost:${PORT}`
+      `Parvez Shop running on http://localhost:${PORT}`
     );
 
   }
