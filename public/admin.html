@@ -8,11 +8,127 @@
   <title>Grameen Shop Admin</title>
 
   <link rel="stylesheet" href="/style.css">
+
+  <style>
+
+    .admin-product{
+      padding:18px;
+      border:1px solid #e5e5e5;
+      border-radius:16px;
+      margin:12px 0;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      background:#fff;
+    }
+
+    .admin-product-image{
+      width:80px;
+      height:80px;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid #ddd;
+      flex-shrink:0;
+    }
+
+    .admin-product-info{
+      flex:1;
+    }
+
+    .admin-product-info b{
+      font-size:17px;
+    }
+
+    .product-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .edit-btn{
+      border:0;
+      padding:9px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      background:#111;
+      color:#fff;
+    }
+
+    .hide-btn{
+      border:0;
+      padding:9px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      background:#eee;
+    }
+
+    .edit-box{
+      margin-top:15px;
+      padding:20px;
+      border-radius:15px;
+      background:#f7f7f7;
+      border:1px solid #ddd;
+    }
+
+    .edit-box h3{
+      margin-top:0;
+    }
+
+    .edit-box input{
+      width:100%;
+      box-sizing:border-box;
+      margin:6px 0 12px;
+    }
+
+    .edit-image-preview{
+      width:150px;
+      height:150px;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid #ddd;
+      margin:8px 0 15px;
+    }
+
+    .edit-buttons{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .cancel-btn{
+      border:0;
+      padding:10px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      background:#ddd;
+    }
+
+    @media(max-width:700px){
+
+      .admin-product{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .admin-product-image{
+        width:100px;
+        height:100px;
+      }
+
+      .product-actions{
+        width:100%;
+      }
+
+    }
+
+  </style>
+
 </head>
 
 <body>
 
 <header>
+
   <a class="logo" href="/">
     GRAMEEN <span>SHOP</span>
   </a>
@@ -20,11 +136,15 @@
   <span style="margin-left:auto">
     Admin Dashboard
   </span>
+
 </header>
+
 
 <main class="section">
 
+
   <!-- LOGIN -->
+
   <div id="login">
 
     <h2>Admin Login</h2>
@@ -44,7 +164,10 @@
         required
       >
 
-      <button class="btn" type="submit">
+      <button
+        class="btn"
+        type="submit"
+      >
         Login
       </button>
 
@@ -54,7 +177,9 @@
 
 
   <!-- DASHBOARD -->
+
   <div id="dash" class="hidden">
+
 
     <div class="head">
 
@@ -71,15 +196,19 @@
 
 
     <!-- ORDERS -->
+
     <div id="orders"></div>
 
 
     <!-- ADD PRODUCT -->
+
     <h2 style="margin-top:60px">
       Add New Product
     </h2>
 
+
     <form id="productForm">
+
 
       <input
         name="name"
@@ -87,11 +216,13 @@
         required
       >
 
+
       <input
         name="category"
         placeholder="Category e.g. Fashion"
         required
       >
+
 
       <input
         name="price"
@@ -99,6 +230,7 @@
         placeholder="Price"
         required
       >
+
 
       <input
         name="old_price"
@@ -119,6 +251,7 @@
       >
         📷 Product Image
       </label>
+
 
       <input
         id="imageFile"
@@ -177,6 +310,7 @@
         ➕ Add Product
       </button>
 
+
     </form>
 
 
@@ -186,7 +320,9 @@
       Products
     </h2>
 
+
     <div id="productsAdmin"></div>
+
 
   </div>
 
@@ -194,6 +330,7 @@
 
 
 <script>
+
 
 /* =====================================================
    CONFIGURATION
@@ -209,7 +346,21 @@ const CLOUDINARY_UPLOAD_PRESET = "grameen_shop";
    ===================================================== */
 
 const api = (url, options) =>
-  fetch(url, options).then(r => r.json());
+  fetch(url, options).then(async r => {
+
+    const data = await r.json().catch(() => ({}));
+
+    if(!r.ok){
+
+      throw new Error(
+        data.error || "Request failed"
+      );
+
+    }
+
+    return data;
+
+  });
 
 
 /* =====================================================
@@ -220,7 +371,8 @@ async function init(){
 
   try{
 
-    const x = await api("/api/admin/me");
+    const x =
+      await api("/api/admin/me");
 
     if(x.loggedIn){
 
@@ -266,30 +418,35 @@ document
 
     e.preventDefault();
 
-    const x = await api(
-      "/api/admin/login",
-      {
-        method:"POST",
+    try{
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+      const x =
+        await api(
+          "/api/admin/login",
+          {
+            method:"POST",
 
-        body:JSON.stringify(
-          Object.fromEntries(
-            new FormData(e.target)
-          )
-        )
+            headers:{
+              "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(
+              Object.fromEntries(
+                new FormData(e.target)
+              )
+            )
+          }
+        );
+
+      if(x.ok){
+
+        show();
+
       }
-    );
 
-    if(x.ok){
+    }catch(error){
 
-      show();
-
-    }else{
-
-      alert(x.error);
+      alert(error.message);
 
     }
 
@@ -304,15 +461,19 @@ document
   .getElementById("imageFile")
   .onchange = e => {
 
-    const file = e.target.files[0];
+    const file =
+      e.target.files[0];
 
     if(!file){
 
-      imagePreview.style.display = "none";
+      document
+        .getElementById("imagePreview")
+        .style.display = "none";
 
       return;
 
     }
+
 
     if(file.size > 10 * 1024 * 1024){
 
@@ -326,15 +487,23 @@ document
 
     }
 
-    const reader = new FileReader();
+
+    const reader =
+      new FileReader();
+
 
     reader.onload = function(){
 
-      previewImg.src = reader.result;
+      document
+        .getElementById("previewImg")
+        .src = reader.result;
 
-      imagePreview.style.display = "block";
+      document
+        .getElementById("imagePreview")
+        .style.display = "block";
 
     };
+
 
     reader.readAsDataURL(file);
 
@@ -342,17 +511,20 @@ document
 
 
 /* =====================================================
-   UPLOAD IMAGE TO CLOUDINARY
+   CLOUDINARY UPLOAD
    ===================================================== */
 
 async function uploadToCloudinary(file){
 
-  const formData = new FormData();
+  const formData =
+    new FormData();
+
 
   formData.append(
     "file",
     file
   );
+
 
   formData.append(
     "upload_preset",
@@ -360,28 +532,40 @@ async function uploadToCloudinary(file){
   );
 
 
-  const response = await fetch(
+  const response =
+    await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method:"POST",
+        body:formData
+      }
+    );
 
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
 
-    {
-      method:"POST",
-      body:formData
-    }
+  const data =
+    await response.json();
 
+
+  console.log(
+    "Cloudinary response:",
+    data
   );
-
-
-  const data = await response.json();
 
 
   if(!response.ok){
 
-    console.error(data);
-
     throw new Error(
       data.error?.message ||
       "Image upload failed."
+    );
+
+  }
+
+
+  if(!data.secure_url){
+
+    throw new Error(
+      "Cloudinary did not return image URL."
     );
 
   }
@@ -400,11 +584,17 @@ async function load(){
 
   try{
 
+    /* ORDERS */
+
     const os =
-      await api("/api/admin/orders");
+      await api(
+        "/api/admin/orders"
+      );
 
 
-    document.getElementById("orders").innerHTML =
+    document
+      .getElementById("orders")
+      .innerHTML =
 
       os.map(o => `
 
@@ -417,9 +607,13 @@ async function load(){
           "
         >
 
-          <b>Order #${o.id}</b>
+          <b>
+            Order #${o.id}
+          </b>
+
           —
           ${o.customer_name}
+
           —
           ${o.phone}
 
@@ -435,16 +629,21 @@ async function load(){
           |
 
           Total:
-          ৳${o.total.toLocaleString()}
+          ৳${Number(o.total).toLocaleString()}
 
           <br>
 
           Items:
+
           ${o.items.map(
-            i => i.name + " × " + i.qty
+            i =>
+              i.name +
+              " × " +
+              i.qty
           ).join(", ")}
 
           <br>
+
 
           <select
             onchange="status(${o.id},this.value)"
@@ -458,15 +657,18 @@ async function load(){
                 "Shipped",
                 "Delivered",
                 "Cancelled"
-              ].map(
+              ]
+              .map(
                 s => `
                   <option
+                    value="${s}"
                     ${s === o.status ? "selected" : ""}
                   >
                     ${s}
                   </option>
                 `
-              ).join("")
+              )
+              .join("")
             }
 
           </select>
@@ -475,88 +677,126 @@ async function load(){
 
       `).join("")
 
-      || "<p>No orders yet.</p>";
+      ||
+
+      "<p>No orders yet.</p>";
 
 
     /* PRODUCTS */
 
     const ps =
-      await api("/api/products");
+      await api(
+        "/api/products"
+      );
 
 
-    document.getElementById("productsAdmin").innerHTML =
+    document
+      .getElementById("productsAdmin")
+      .innerHTML =
 
       ps.map(p => `
 
         <div
-          style="
-            padding:15px;
-            border-bottom:1px solid #eee;
-            display:flex;
-            align-items:center;
-            gap:14px;
-          "
+          class="admin-product"
+          id="product-${p.id}"
         >
+
 
           ${
             p.icon &&
             (
-              p.icon.startsWith("http") ||
+              p.icon.startsWith("http://") ||
+              p.icon.startsWith("https://") ||
               p.icon.startsWith("data:image")
             )
 
             ?
 
             `<img
+              class="admin-product-image"
               src="${p.icon}"
-              alt="${p.name}"
-              style="
-                width:70px;
-                height:70px;
-                object-fit:cover;
-                border-radius:12px;
-                border:1px solid #ddd;
-              "
+              alt="${escapeHtml(p.name)}"
             >`
 
             :
 
-            `<span style="font-size:38px">
-              ${p.icon || "🛍️"}
-            </span>`
+            `<div
+              class="admin-product-image"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:38px;
+              "
+            >
+              ${escapeHtml(p.icon || "🛍️")}
+            </div>`
           }
 
 
-          <div>
+          <div class="admin-product-info">
 
-            <b>${p.name}</b>
-
-            <br>
-
-            ${p.category}
+            <b>
+              ${escapeHtml(p.name)}
+            </b>
 
             <br>
 
-            ৳${Number(p.price).toLocaleString()}
+            ${escapeHtml(p.category)}
 
-            —
+            <br>
+
+            <strong>
+              ৳${Number(p.price).toLocaleString()}
+            </strong>
+
+            ${
+              Number(p.old_price) > 0
+              ?
+              `
+                <del style="margin-left:8px">
+                  ৳${Number(p.old_price).toLocaleString()}
+                </del>
+              `
+              :
+              ""
+            }
+
+            <br>
 
             Stock:
-            ${p.stock}
+            ${Number(p.stock)}
 
           </div>
 
 
-          <button
-            onclick="del(${p.id})"
-            style="margin-left:auto"
-          >
-            Hide
-          </button>
+          <div class="product-actions">
+
+            <button
+              class="edit-btn"
+              onclick="editProduct(${p.id})"
+            >
+              ✏️ Edit
+            </button>
+
+
+            <button
+              class="hide-btn"
+              onclick="del(${p.id})"
+            >
+              👁️ Hide
+            </button>
+
+          </div>
+
 
         </div>
 
-      `).join("");
+      `).join("")
+
+      ||
+
+      "<p>No products found.</p>";
 
 
   }catch(error){
@@ -564,10 +804,27 @@ async function load(){
     console.error(error);
 
     alert(
-      "Could not load products/orders."
+      "Could not load products/orders: " +
+      error.message
     );
 
   }
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+   ===================================================== */
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 
 }
 
@@ -578,22 +835,31 @@ async function load(){
 
 async function status(id,s){
 
-  await api(
-    "/api/admin/orders/" + id,
-    {
-      method:"PATCH",
+  try{
 
-      headers:{
-        "Content-Type":"application/json"
-      },
+    await api(
+      "/api/admin/orders/" + id,
+      {
+        method:"PATCH",
 
-      body:JSON.stringify({
-        status:s
-      })
-    }
-  );
+        headers:{
+          "Content-Type":"application/json"
+        },
 
-  load();
+        body:JSON.stringify({
+          status:s
+        })
+      }
+    );
+
+
+    await load();
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
 
 }
 
@@ -610,12 +876,15 @@ document
 
 
     const button =
-      document.getElementById("addProductBtn");
+      document.getElementById(
+        "addProductBtn"
+      );
 
 
     const file =
-      document.getElementById("imageFile")
-      .files[0];
+      document
+        .getElementById("imageFile")
+        .files[0];
 
 
     if(!file){
@@ -631,27 +900,17 @@ document
 
     try{
 
-      /* DISABLE BUTTON */
-
       button.disabled = true;
 
       button.textContent =
         "⏳ Uploading image...";
 
 
-      /* UPLOAD IMAGE */
-
       const imageUrl =
-        await uploadToCloudinary(file);
+        await uploadToCloudinary(
+          file
+        );
 
-
-      console.log(
-        "Cloudinary image:",
-        imageUrl
-      );
-
-
-      /* PRODUCT DATA */
 
       const data =
         Object.fromEntries(
@@ -659,15 +918,9 @@ document
         );
 
 
-      /*
-        Cloudinary URL is saved
-        inside the existing icon field.
-      */
+      data.icon =
+        imageUrl;
 
-      data.icon = imageUrl;
-
-
-      /* ADD PRODUCT TO DATABASE */
 
       button.textContent =
         "⏳ Adding product...";
@@ -697,8 +950,6 @@ document
 
       }
 
-
-      /* SUCCESS */
 
       alert(
         "✅ Product and image added successfully!"
@@ -733,10 +984,7 @@ document
 
       alert(
         "❌ " +
-        (
-          error.message ||
-          "Something went wrong."
-        )
+        error.message
       );
 
 
@@ -748,6 +996,508 @@ document
     }
 
   };
+
+
+/* =====================================================
+   EDIT PRODUCT
+   ===================================================== */
+
+async function editProduct(id){
+
+  try{
+
+    const products =
+      await api(
+        "/api/products"
+      );
+
+
+    const p =
+      products.find(
+        x => Number(x.id) === Number(id)
+      );
+
+
+    if(!p){
+
+      alert(
+        "Product not found."
+      );
+
+      return;
+
+    }
+
+
+    const oldEditor =
+      document.getElementById(
+        "edit-box-" + id
+      );
+
+
+    if(oldEditor){
+
+      oldEditor.remove();
+
+      return;
+
+    }
+
+
+    const productElement =
+      document.getElementById(
+        "product-" + id
+      );
+
+
+    const editor =
+      document.createElement("div");
+
+
+    editor.id =
+      "edit-box-" + id;
+
+
+    editor.className =
+      "edit-box";
+
+
+    editor.innerHTML = `
+
+      <h3>
+        ✏️ Edit Product
+      </h3>
+
+
+      <label>
+        Product Name
+      </label>
+
+      <input
+        id="edit-name-${id}"
+        value="${escapeHtml(p.name)}"
+      >
+
+
+      <label>
+        Category
+      </label>
+
+      <input
+        id="edit-category-${id}"
+        value="${escapeHtml(p.category)}"
+      >
+
+
+      <label>
+        Price
+      </label>
+
+      <input
+        id="edit-price-${id}"
+        type="number"
+        value="${Number(p.price)}"
+      >
+
+
+      <label>
+        Old Price
+      </label>
+
+      <input
+        id="edit-old-price-${id}"
+        type="number"
+        value="${Number(p.old_price || 0)}"
+      >
+
+
+      <label>
+        Stock
+      </label>
+
+      <input
+        id="edit-stock-${id}"
+        type="number"
+        value="${Number(p.stock)}"
+      >
+
+
+      <label>
+        📷 Change Product Image
+      </label>
+
+      <input
+        id="edit-image-${id}"
+        type="file"
+        accept="image/*"
+      >
+
+
+      ${
+        p.icon &&
+        (
+          p.icon.startsWith("http") ||
+          p.icon.startsWith("data:image")
+        )
+
+        ?
+
+        `
+          <br>
+
+          <img
+            id="edit-preview-${id}"
+            class="edit-image-preview"
+            src="${p.icon}"
+          >
+        `
+
+        :
+
+        `
+          <div
+            id="edit-preview-${id}"
+            style="
+              font-size:50px;
+              margin:10px 0;
+            "
+          >
+            ${escapeHtml(p.icon || "🛍️")}
+          </div>
+        `
+      }
+
+
+      <div class="edit-buttons">
+
+        <button
+          class="btn"
+          type="button"
+          onclick="saveProduct(${id})"
+          id="save-edit-${id}"
+        >
+          💾 Save Changes
+        </button>
+
+
+        <button
+          class="cancel-btn"
+          type="button"
+          onclick="cancelEdit(${id})"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    `;
+
+
+    productElement
+      .parentNode
+      .insertBefore(
+        editor,
+        productElement.nextSibling
+      );
+
+
+    const imageInput =
+      document.getElementById(
+        "edit-image-" + id
+      );
+
+
+    imageInput.onchange =
+      function(){
+
+        const file =
+          this.files[0];
+
+        if(!file)return;
+
+
+        if(file.size > 10 * 1024 * 1024){
+
+          alert(
+            "Image must be under 10MB."
+          );
+
+          this.value = "";
+
+          return;
+
+        }
+
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload =
+          function(e){
+
+            const preview =
+              document.getElementById(
+                "edit-preview-" + id
+              );
+
+
+            if(
+              preview &&
+              preview.tagName === "IMG"
+            ){
+
+              preview.src =
+                e.target.result;
+
+            }
+
+          };
+
+
+        reader.readAsDataURL(file);
+
+      };
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "Could not open editor: " +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   CANCEL EDIT
+   ===================================================== */
+
+function cancelEdit(id){
+
+  const editor =
+    document.getElementById(
+      "edit-box-" + id
+    );
+
+
+  if(editor){
+
+    editor.remove();
+
+  }
+
+}
+
+
+/* =====================================================
+   SAVE PRODUCT
+   ===================================================== */
+
+async function saveProduct(id){
+
+  const button =
+    document.getElementById(
+      "save-edit-" + id
+    );
+
+
+  const name =
+    document.getElementById(
+      "edit-name-" + id
+    ).value.trim();
+
+
+  const category =
+    document.getElementById(
+      "edit-category-" + id
+    ).value.trim();
+
+
+  const price =
+    document.getElementById(
+      "edit-price-" + id
+    ).value;
+
+
+  const old_price =
+    document.getElementById(
+      "edit-old-price-" + id
+    ).value;
+
+
+  const stock =
+    document.getElementById(
+      "edit-stock-" + id
+    ).value;
+
+
+  const imageInput =
+    document.getElementById(
+      "edit-image-" + id
+    );
+
+
+  if(!name){
+
+    alert(
+      "Product name is required."
+    );
+
+    return;
+
+  }
+
+
+  if(!category){
+
+    alert(
+      "Category is required."
+    );
+
+    return;
+
+  }
+
+
+  if(!price || Number(price) <= 0){
+
+    alert(
+      "Please enter a valid price."
+    );
+
+    return;
+
+  }
+
+
+  if(Number(stock) < 0){
+
+    alert(
+      "Stock cannot be negative."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    button.disabled = true;
+
+    button.textContent =
+      "⏳ Saving...";
+
+
+    let imageUrl = null;
+
+
+    /* NEW IMAGE */
+
+    if(
+      imageInput &&
+      imageInput.files &&
+      imageInput.files[0]
+    ){
+
+      button.textContent =
+        "⏳ Uploading new image...";
+
+
+      imageUrl =
+        await uploadToCloudinary(
+          imageInput.files[0]
+        );
+
+    }
+
+
+    const data = {
+
+      name:name,
+
+      category:category,
+
+      price:Number(price),
+
+      old_price:Number(old_price) || 0,
+
+      stock:Number(stock)
+
+    };
+
+
+    /* Only replace image if a new image was selected */
+
+    if(imageUrl){
+
+      data.icon =
+        imageUrl;
+
+    }
+
+
+    button.textContent =
+      "⏳ Saving product...";
+
+
+    const x =
+      await api(
+        "/api/admin/products/" + id,
+        {
+          method:"PATCH",
+
+          headers:{
+            "Content-Type":"application/json"
+          },
+
+          body:JSON.stringify(data)
+        }
+      );
+
+
+    if(!x.ok){
+
+      throw new Error(
+        x.error ||
+        "Could not update product."
+      );
+
+    }
+
+
+    alert(
+      "✅ Product updated successfully!"
+    );
+
+
+    await load();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      "❌ " +
+      error.message
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "💾 Save Changes";
+
+  }
+
+}
 
 
 /* =====================================================
@@ -767,24 +1517,28 @@ async function del(id){
   }
 
 
-  const x =
-    await api(
-      "/api/admin/products/" + id,
-      {
-        method:"DELETE"
-      }
-    );
+  try{
+
+    const x =
+      await api(
+        "/api/admin/products/" + id,
+        {
+          method:"DELETE"
+        }
+      );
 
 
-  if(x.ok){
+    if(x.ok){
 
-    load();
+      await load();
 
-  }else{
+    }
+
+  }catch(error){
 
     alert(
-      x.error ||
-      "Could not hide product."
+      "❌ " +
+      error.message
     );
 
   }
@@ -798,14 +1552,20 @@ async function del(id){
 
 async function logout(){
 
-  await api(
-    "/api/admin/logout",
-    {
-      method:"POST"
-    }
-  );
+  try{
 
-  location.reload();
+    await api(
+      "/api/admin/logout",
+      {
+        method:"POST"
+      }
+    );
+
+  }finally{
+
+    location.reload();
+
+  }
 
 }
 
