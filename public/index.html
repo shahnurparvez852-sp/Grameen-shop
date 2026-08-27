@@ -1,1119 +1,824 @@
+```html
 <!doctype html>
 <html lang="en">
-
 <head>
-
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+  <title>Grameen Shop | Online Shopping in Bangladesh</title>
 
-  <title>
-    Grameen Shop | Online Shopping in Bangladesh
-  </title>
+  <meta name="description"
+        content="Grameen Shop - Quality products, great prices and reliable delivery across Bangladesh.">
 
-  <meta
-    name="description"
-    content="Grameen Shop - Quality products, great prices and reliable delivery across Bangladesh."
-  >
-
-  <link
-    rel="stylesheet"
-    href="/style.css"
-  >
-
+  <link rel="stylesheet" href="/style.css">
 </head>
-
 
 <body>
 
-
-<!-- =====================================================
-     TOP BAR
-===================================================== -->
-
-<div class="top">
-
-  🚚 Fast Delivery
-
-  &nbsp; • &nbsp;
-
-  💵 Cash on Delivery
-
-  &nbsp; • &nbsp;
-
-  🔒 Secure Ordering
-
-</div>
-
-
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header>
-
-  <a
-    class="logo"
-    href="/"
-  >
-    GRAMEEN <span>SHOP</span>
-  </a>
-
-
-  <div class="search-box">
-
-    🔎
-
-    <input
-      id="search"
-      placeholder="Search products..."
-      oninput="render()"
-    >
-
+  <!-- TOP BAR -->
+  <div class="top">
+    🚚 Fast Delivery &nbsp; • &nbsp;
+    💵 Cash on Delivery &nbsp; • &nbsp;
+    🔒 Secure Ordering
   </div>
 
-
-  <button
-    class="cart-button"
-    onclick="openCart()"
-  >
-
-    🛒 Cart
-
-    <b id="count">
-      0
-    </b>
-
-  </button>
-
-</header>
-
-
-
-<!-- =====================================================
-     NAVIGATION
-===================================================== -->
-
-<nav>
-
-  <a href="#home">
-    Home
-  </a>
-
-  <a href="#products">
-    Shop
-  </a>
-
-  <a href="#about">
-    Why Us
-  </a>
-
-  <a href="#contact">
-    Contact
-  </a>
-
-  <a
-    class="admin-link"
-    href="/admin.html"
-  >
-    Admin
-  </a>
-
-</nav>
-
-
-
-<main>
-
-
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<section
-  id="home"
-  class="hero"
->
-
-  <div class="hero-content">
-
-    <div class="hero-badge">
-      ✨ NEW COLLECTION
-    </div>
-
-
-    <h1>
-
-      Shop smarter.
-
-      <br>
-
-      <em>
-        Live better.
-      </em>
-
-    </h1>
-
-
-    <p>
-
-      Discover quality products at great prices,
-      with reliable delivery across Bangladesh.
-
-    </p>
-
-
-    <div class="hero-buttons">
-
-      <a
-        class="btn"
-        href="#products"
-      >
-        🛍️ Shop Now
-      </a>
-
-
-      <a
-        class="btn secondary-btn"
-        href="#about"
-      >
-        Learn More
-      </a>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="hero-visual">
-
-    <div class="gold-circle"></div>
-
-    <div class="shopping-bag">
-      🛍️
-    </div>
-
-
-    <div class="floating-card card-one">
-      ⭐ Top Quality
-    </div>
-
-
-    <div class="floating-card card-two">
-      🚚 Fast Delivery
-    </div>
-
-  </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     TRUST FEATURES
-===================================================== -->
-
-<section class="trust-section">
-
-
-  <div class="trust-card">
-
-    <div class="trust-icon">
-      🚚
-    </div>
-
-    <div>
-
-      <h3>
-        Fast Delivery
-      </h3>
-
-      <p>
-        Delivery across Bangladesh
-      </p>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="trust-card">
-
-    <div class="trust-icon">
-      💵
-    </div>
-
-    <div>
-
-      <h3>
-        Cash on Delivery
-      </h3>
-
-      <p>
-        Pay when you receive
-      </p>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="trust-card">
-
-    <div class="trust-icon">
-      🔒
-    </div>
-
-    <div>
-
-      <h3>
-        Secure Ordering
-      </h3>
-
-      <p>
-        Your information is protected
-      </p>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="trust-card">
-
-    <div class="trust-icon">
-      💬
-    </div>
-
-    <div>
-
-      <h3>
-        Customer Support
-      </h3>
-
-      <p>
-        We are here to help
-      </p>
-
-    </div>
-
-  </div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     PRODUCTS
-===================================================== -->
-
-<section
-  id="products"
-  class="section"
->
-
-
-  <div class="section-heading">
-
-
-    <div>
-
-      <small>
-        OUR COLLECTION
-      </small>
-
-
-      <h2>
-        Featured Products
-      </h2>
-
-
-      <p class="section-subtitle">
-
-        Explore our latest products
-        and best deals.
-
-      </p>
-
-    </div>
-
-
-
-    <select
-      id="sort"
-      onchange="render()"
-    >
-
-      <option value="">
-        Featured
-      </option>
-
-      <option value="low">
-        Price: Low → High
-      </option>
-
-      <option value="high">
-        Price: High → Low
-      </option>
-
-    </select>
-
-
-  </div>
-
-
-
-  <!-- CATEGORY -->
-
-  <div id="cats"></div>
-
-
-
-  <!-- PRODUCT GRID -->
-
-  <div
-    id="grid"
-    class="grid"
-  ></div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     ABOUT
-===================================================== -->
-
-<section
-  id="about"
-  class="section light"
->
-
-
-  <div class="about-heading">
-
-
-    <small>
-      WHY GRAMEEN SHOP
-    </small>
-
-
-    <h2>
-
-      Shopping made simple.
-
-      <br>
-
-      <span>
-        Trusted by customers.
-      </span>
-
-    </h2>
-
-
-    <p>
-
-      We focus on quality products,
-      fair prices, reliable delivery
-      and friendly customer service.
-
-    </p>
-
-
-  </div>
-
-
-
-  <div class="features">
-
-
-    <div class="feature-card">
-
-      <div class="feature-icon">
-        🛡️
-      </div>
-
-
-      <h3>
-        Trusted Shopping
-      </h3>
-
-
-      <p>
-        Shop confidently with our
-        secure ordering system.
-      </p>
-
-    </div>
-
-
-
-    <div class="feature-card">
-
-      <div class="feature-icon">
-        🚚
-      </div>
-
-
-      <h3>
-        Reliable Delivery
-      </h3>
-
-
-      <p>
-        Get your products delivered
-        conveniently across Bangladesh.
-      </p>
-
-    </div>
-
-
-
-    <div class="feature-card">
-
-      <div class="feature-icon">
-        💰
-      </div>
-
-
-      <h3>
-        Great Prices
-      </h3>
-
-
-      <p>
-        Quality products at
-        competitive prices.
-      </p>
-
-    </div>
-
-
-  </div>
-
-
-</section>
-
-
-
-<!-- =====================================================
-     CONTACT
-===================================================== -->
-
-<section
-  id="contact"
-  class="section contact"
->
-
-
-  <div class="contact-box">
-
-
-    <div>
-
-      <small>
-        CONTACT US
-      </small>
-
-
-      <h2>
-        Need help?
-      </h2>
-
-
-      <p>
-
-        Our team is ready to help
-        you with your order.
-
-      </p>
-
-    </div>
-
-
-
-    <div class="contact-details">
-
-
-      <div>
-
-        📞
-
-        <strong>
-          Phone
-        </strong>
-
-        <span>
-          01728376687
-        </span>
-
-      </div>
-
-
-
-      <div>
-
-        📧
-
-        <strong>
-          Email
-        </strong>
-
-        <span>
-          shahnurparvez852@gmail.com
-        </span>
-
-      </div>
-
-
-    </div>
-
-
-  </div>
-
-
-</section>
-
-
-</main>
-
-
-
-<!-- =====================================================
-     CART
-===================================================== -->
-
-<div
-  id="cart"
-  class="overlay hidden"
-  onclick="if(event.target.id==='cart')closeCart()"
->
-
-
-  <aside>
-
-
-    <button
-      class="x"
-      onclick="closeCart()"
-    >
-      ×
-    </button>
-
-
-    <small>
-      YOUR SHOPPING BAG
-    </small>
-
-
-    <h2>
-      Your Cart 🛒
-    </h2>
-
-
-    <div id="cartItems"></div>
-
-
-
-    <div class="cart-total">
-
-      <span>
-        Total
-      </span>
-
-
-      <strong id="total">
-        ৳0
-      </strong>
-
-    </div>
-
-
-
-    <button
-      class="btn full"
-      onclick="checkout()"
-    >
-
-      Proceed to Checkout →
-
-    </button>
-
-
-  </aside>
-
-
-</div>
-
-
-
-<!-- =====================================================
-     CHECKOUT
-===================================================== -->
-
-<div
-  id="checkout"
-  class="overlay hidden"
->
-
-
-  <aside>
-
-
-    <button
-      class="x"
-      onclick="closeCheckout()"
-    >
-      ×
-    </button>
-
-
-    <small>
-      SECURE CHECKOUT
-    </small>
-
-
-    <h2>
-      Place Your Order
-    </h2>
-
-
-
-    <form id="orderForm">
-
-
-      <!-- NAME -->
-
-      <label>
-        Full Name
-      </label>
-
-
+  <!-- HEADER -->
+  <header>
+
+    <a class="logo" href="/">
+      GRAMEEN <span>SHOP</span>
+    </a>
+
+    <div class="search-box">
+      🔎
       <input
-        name="customer_name"
-        required
-        placeholder="Enter your full name"
+        id="search"
+        placeholder="Search products..."
+        oninput="render()"
       >
+    </div>
 
+    <button class="cart-button" onclick="openCart()">
+      🛒 Cart <b id="count">0</b>
+    </button>
 
+  </header>
 
-      <!-- PHONE -->
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#products">Shop</a>
+    <a href="#tracking">Track Order</a>
+    <a href="#about">Why Us</a>
+    <a href="#contact">Contact</a>
+    <a class="admin-link" href="/admin.html">Admin</a>
+  </nav>
 
-      <label>
-        Phone Number
-      </label>
+  <main>
 
+    <!-- HERO -->
+    <section id="home" class="hero">
 
-      <input
-        name="phone"
-        required
-        inputmode="tel"
-        placeholder="01XXXXXXXXX"
-      >
+      <div class="hero-content">
 
+        <div class="hero-badge">
+          ✨ NEW COLLECTION
+        </div>
 
+        <h1>
+          Shop smarter.
+          <br>
+          <em>Live better.</em>
+        </h1>
 
-      <!-- ADDRESS -->
+        <p>
+          Discover quality products at great prices,
+          with reliable delivery across Bangladesh.
+        </p>
 
-      <label>
-        Delivery Address
-      </label>
+        <div class="hero-buttons">
 
+          <a class="btn" href="#products">
+            🛍️ Shop Now
+          </a>
 
-      <textarea
-        name="address"
-        required
-        placeholder="Enter your complete delivery address"
-      ></textarea>
+          <a class="btn secondary-btn" href="#tracking">
+            📦 Track Order
+          </a>
 
+        </div>
 
+      </div>
 
-      <!-- PAYMENT -->
+      <div class="hero-visual">
 
-      <label>
-        Payment Method
-      </label>
+        <div class="gold-circle"></div>
 
+        <div class="shopping-bag">
+          🛍️
+        </div>
 
-      <select
-        name="payment"
-        id="paymentMethod"
-        required
-      >
+        <div class="floating-card card-one">
+          ⭐ Top Quality
+        </div>
 
+        <div class="floating-card card-two">
+          🚚 Fast Delivery
+        </div>
 
-        <option value="COD">
-          💵 Cash on Delivery
-        </option>
+      </div>
 
+    </section>
 
-        <option value="bKash Manual">
-          📱 bKash Manual Payment
-        </option>
+    <!-- TRUST FEATURES -->
+    <section class="trust-section">
 
+      <div class="trust-card">
+        <div class="trust-icon">🚚</div>
+        <div>
+          <h3>Fast Delivery</h3>
+          <p>Delivery across Bangladesh</p>
+        </div>
+      </div>
 
-        <option value="Nagad Manual">
-          📱 Nagad Manual Payment
-        </option>
+      <div class="trust-card">
+        <div class="trust-icon">💵</div>
+        <div>
+          <h3>Cash on Delivery</h3>
+          <p>Pay when you receive</p>
+        </div>
+      </div>
 
+      <div class="trust-card">
+        <div class="trust-icon">🔒</div>
+        <div>
+          <h3>Secure Ordering</h3>
+          <p>Your information is protected</p>
+        </div>
+      </div>
 
-      </select>
+      <div class="trust-card">
+        <div class="trust-icon">💬</div>
+        <div>
+          <h3>Customer Support</h3>
+          <p>We are here to help</p>
+        </div>
+      </div>
 
+    </section>
 
+    <!-- PRODUCTS -->
+    <section id="products" class="section">
 
-      <!-- =================================================
-           PAYMENT INFORMATION
-      ================================================= -->
+      <div class="section-heading">
+
+        <div>
+          <small>OUR COLLECTION</small>
+
+          <h2>
+            Featured Products
+          </h2>
+
+          <p class="section-subtitle">
+            Explore our latest products and best deals.
+          </p>
+        </div>
+
+        <select id="sort" onchange="render()">
+          <option value="">Featured</option>
+          <option value="low">Price: Low → High</option>
+          <option value="high">Price: High → Low</option>
+        </select>
+
+      </div>
+
+      <div id="cats"></div>
+
+      <div id="grid" class="grid"></div>
+
+    </section>
+
+    <!-- ================================
+         ORDER TRACKING
+    ================================= -->
+
+    <section id="tracking" class="section light">
+
+      <div class="about-heading">
+
+        <small>ORDER TRACKING</small>
+
+        <h2>
+          Track your order.
+          <br>
+          <span>Stay updated.</span>
+        </h2>
+
+        <p>
+          Enter your Order ID and phone number to check
+          your latest order status.
+        </p>
+
+      </div>
 
       <div
-        id="paymentInfo"
         style="
-          display:none;
-          margin:16px 0;
-          padding:18px;
-          border:1px solid #ddd;
-          border-radius:14px;
-          background:#fafafa;
+          max-width:600px;
+          margin:30px auto 0;
+          background:#fff;
+          padding:30px;
+          border-radius:20px;
+          box-shadow:0 10px 35px rgba(0,0,0,.08);
         "
       >
 
+        <form id="trackingForm">
 
-        <!-- BKASH -->
+          <label>
+            Order ID
+          </label>
+
+          <input
+            id="trackingOrderId"
+            type="number"
+            required
+            placeholder="Example: 1001"
+          >
+
+          <label>
+            Phone Number
+          </label>
+
+          <input
+            id="trackingPhone"
+            type="tel"
+            required
+            placeholder="01XXXXXXXXX"
+          >
+
+          <button
+            class="btn full"
+            type="submit"
+          >
+            🔎 Track My Order
+          </button>
+
+        </form>
+
+        <!-- TRACKING RESULT -->
 
         <div
-          id="bkashInfo"
-          style="display:none;"
-        >
-
-
-          <h3
-            style="
-              margin-top:0;
-              margin-bottom:8px;
-            "
-          >
-
-            📱 bKash Payment
-
-          </h3>
-
-
-          <p>
-
-            Send your payment to our
-            <strong>bKash Merchant</strong>
-            account:
-
-          </p>
-
-
-          <div
-            style="
-              font-size:25px;
-              font-weight:800;
-              margin:12px 0;
-              letter-spacing:1px;
-            "
-          >
-
-            01312376687
-
-          </div>
-
-
-          <p
-            style="
-              margin-bottom:0;
-            "
-          >
-
-            After payment, please write
-            your payment transaction ID
-            in the Order Note below.
-
-          </p>
-
-
-        </div>
-
-
-
-        <!-- NAGAD -->
-
-        <div
-          id="nagadInfo"
-          style="display:none;"
-        >
-
-
-          <h3
-            style="
-              margin-top:0;
-              margin-bottom:8px;
-            "
-          >
-
-            📱 Nagad Payment
-
-          </h3>
-
-
-          <p>
-
-            Send your payment to our
-            <strong>Nagad</strong>
-            account:
-
-          </p>
-
-
-          <div
-            style="
-              font-size:25px;
-              font-weight:800;
-              margin:12px 0;
-              letter-spacing:1px;
-            "
-          >
-
-            01728376687
-
-          </div>
-
-
-          <p
-            style="
-              margin-bottom:0;
-            "
-          >
-
-            After payment, please write
-            your payment transaction ID
-            in the Order Note below.
-
-          </p>
-
-
-        </div>
-
+          id="trackingResult"
+          style="
+            margin-top:25px;
+            display:none;
+          "
+        ></div>
 
       </div>
 
+    </section>
 
+    <!-- ABOUT -->
+    <section id="about" class="section">
 
-      <!-- ORDER NOTE -->
+      <div class="about-heading">
 
-      <label>
-        Order Note
-      </label>
+        <small>WHY GRAMEEN SHOP</small>
 
+        <h2>
+          Shopping made simple.
+          <br>
+          <span>Trusted by customers.</span>
+        </h2>
 
-      <textarea
-        name="note"
-        id="orderNote"
-        placeholder="Optional note"
-      ></textarea>
+        <p>
+          We focus on quality products, fair prices,
+          reliable delivery and friendly customer service.
+        </p>
 
+      </div>
 
+      <div class="features">
 
-      <!-- CONFIRM -->
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            🛡️
+          </div>
+
+          <h3>Trusted Shopping</h3>
+
+          <p>
+            Shop confidently with our secure ordering system.
+          </p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            🚚
+          </div>
+
+          <h3>Reliable Delivery</h3>
+
+          <p>
+            Get your products delivered conveniently across Bangladesh.
+          </p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon">
+            💰
+          </div>
+
+          <h3>Great Prices</h3>
+
+          <p>
+            Quality products at competitive prices.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section contact">
+
+      <div class="contact-box">
+
+        <div>
+
+          <small>CONTACT US</small>
+
+          <h2>
+            Need help?
+          </h2>
+
+          <p>
+            Our team is ready to help you with your order.
+          </p>
+
+        </div>
+
+        <div class="contact-details">
+
+          <div>
+            📞
+            <strong>Phone</strong>
+            <span>01728376687</span>
+          </div>
+
+          <div>
+            📧
+            <strong>Email</strong>
+            <span>shahnurparvez852@gmail.com</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================================
+       CART
+  ================================= -->
+
+  <div
+    id="cart"
+    class="overlay hidden"
+    onclick="if(event.target.id==='cart')closeCart()"
+  >
+
+    <aside>
+
+      <button
+        class="x"
+        onclick="closeCart()"
+      >
+        ×
+      </button>
+
+      <small>YOUR SHOPPING BAG</small>
+
+      <h2>
+        Your Cart 🛒
+      </h2>
+
+      <div id="cartItems"></div>
+
+      <div class="cart-total">
+
+        <span>Total</span>
+
+        <strong id="total">
+          ৳0
+        </strong>
+
+      </div>
 
       <button
         class="btn full"
-        type="submit"
-        id="confirmOrderBtn"
+        onclick="checkout()"
       >
-
-        ✅ Confirm Order
-
+        Proceed to Checkout →
       </button>
 
+    </aside>
 
-    </form>
+  </div>
 
+  <!-- ================================
+       CHECKOUT
+  ================================= -->
 
+  <div
+    id="checkout"
+    class="overlay hidden"
+  >
 
-    <p class="muted">
+    <aside>
 
-      🔒 Your order information
-      is securely processed.
+      <button
+        class="x"
+        onclick="closeCheckout()"
+      >
+        ×
+      </button>
 
+      <small>SECURE CHECKOUT</small>
+
+      <h2>
+        Place Your Order
+      </h2>
+
+      <form id="orderForm">
+
+        <label>
+          Full Name
+        </label>
+
+        <input
+          name="customer_name"
+          required
+          placeholder="Enter your full name"
+        >
+
+        <label>
+          Phone Number
+        </label>
+
+        <input
+          name="phone"
+          required
+          placeholder="01XXXXXXXXX"
+        >
+
+        <label>
+          Delivery Address
+        </label>
+
+        <textarea
+          name="address"
+          required
+          placeholder="Enter your complete delivery address"
+        ></textarea>
+
+        <label>
+          Payment Method
+        </label>
+
+        <select
+          name="payment"
+          id="paymentMethod"
+          onchange="showPaymentInfo()"
+        >
+
+          <option value="COD">
+            💵 Cash on Delivery
+          </option>
+
+          <option value="bKash Manual">
+            📱 bKash Manual Payment
+          </option>
+
+          <option value="Nagad Manual">
+            📱 Nagad Manual Payment
+          </option>
+
+        </select>
+
+        <!-- PAYMENT INFORMATION -->
+
+        <div
+          id="paymentInfo"
+          style="
+            display:none;
+            margin:15px 0;
+            padding:18px;
+            border-radius:15px;
+            background:#f7f7f7;
+            border:1px solid #ddd;
+          "
+        ></div>
+
+        <label>
+          Order Note
+        </label>
+
+        <textarea
+          name="note"
+          placeholder="Optional note"
+        ></textarea>
+
+        <button
+          class="btn full"
+          type="submit"
+        >
+          ✅ Confirm Order
+        </button>
+
+      </form>
+
+      <p class="muted">
+        🔒 Your order information is securely processed.
+      </p>
+
+    </aside>
+
+  </div>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div class="footer-logo">
+      GRAMEEN <span>SHOP</span>
+    </div>
+
+    <p>
+      Quality products • Great prices • Reliable delivery
     </p>
 
+    <p>
+      📞 01728376687
+      &nbsp; • &nbsp;
+      📧 shahnurparvez852@gmail.com
+    </p>
 
-  </aside>
+    <div class="footer-bottom">
+      © 2026 Grameen Shop. All rights reserved.
+    </div>
 
+  </footer>
 
-</div>
+  <!-- PAYMENT + TRACKING SMALL HELPER -->
 
+  <script>
 
+    function showPaymentInfo(){
 
-<!-- =====================================================
-     FOOTER
-===================================================== -->
+      const method =
+        document.getElementById("paymentMethod").value;
 
-<footer>
+      const box =
+        document.getElementById("paymentInfo");
 
+      if(method === "bKash Manual"){
 
-  <div class="footer-logo">
+        box.style.display = "block";
 
-    GRAMEEN
-    <span>
-      SHOP
-    </span>
+        box.innerHTML = `
+          <strong>📱 bKash Payment</strong>
 
-  </div>
+          <p style="margin:8px 0;">
+            Send your payment to:
+          </p>
 
+          <div
+            style="
+              font-size:22px;
+              font-weight:800;
+              margin:8px 0;
+            "
+          >
+            01312376687
+          </div>
 
-  <p>
+          <small>
+            bKash Merchant Account
+          </small>
 
-    Quality products •
-    Great prices •
-    Reliable delivery
+          <p style="margin-top:10px;">
+            Please keep your payment transaction ID.
+          </p>
+        `;
 
-  </p>
+      }
 
+      else if(method === "Nagad Manual"){
 
-  <p>
+        box.style.display = "block";
 
-    📞 01728376687
+        box.innerHTML = `
+          <strong>📱 Nagad Payment</strong>
 
-    &nbsp; • &nbsp;
+          <p style="margin:8px 0;">
+            Send your payment to:
+          </p>
 
-    📧 shahnurparvez852@gmail.com
+          <div
+            style="
+              font-size:22px;
+              font-weight:800;
+              margin:8px 0;
+            "
+          >
+            01728376687
+          </div>
 
-  </p>
+          <small>
+            Nagad Personal Account
+          </small>
 
+          <p style="margin-top:10px;">
+            Please keep your payment transaction ID.
+          </p>
+        `;
 
-  <div class="footer-bottom">
+      }
 
-    © 2026 Grameen Shop.
-    All rights reserved.
+      else{
 
-  </div>
+        box.style.display = "none";
+        box.innerHTML = "";
 
+      }
 
-</footer>
+    }
 
 
+    /* ORDER TRACKING */
 
-<!-- =====================================================
-     PAYMENT JAVASCRIPT
-===================================================== -->
-
-<script>
-
-const paymentMethod =
-  document.getElementById("paymentMethod");
-
-
-const paymentInfo =
-  document.getElementById("paymentInfo");
-
-
-const bkashInfo =
-  document.getElementById("bkashInfo");
-
-
-const nagadInfo =
-  document.getElementById("nagadInfo");
-
-
-const orderNote =
-  document.getElementById("orderNote");
-
-
-
-function showPaymentInfo(){
-
-  const method =
-    paymentMethod.value;
-
-
-  paymentInfo.style.display =
-    "none";
-
-
-  bkashInfo.style.display =
-    "none";
-
-
-  nagadInfo.style.display =
-    "none";
-
-
-  if(method === "bKash Manual"){
-
-    paymentInfo.style.display =
-      "block";
-
-    bkashInfo.style.display =
-      "block";
-
-
-    orderNote.placeholder =
-      "Enter your bKash Transaction ID / payment details";
-
-
-    return;
-
-  }
-
-
-
-  if(method === "Nagad Manual"){
-
-    paymentInfo.style.display =
-      "block";
-
-    nagadInfo.style.display =
-      "block";
-
-
-    orderNote.placeholder =
-      "Enter your Nagad Transaction ID / payment details";
-
-
-    return;
-
-  }
-
-
-
-  orderNote.placeholder =
-    "Optional note";
-
-}
-
-
-paymentMethod.addEventListener(
-  "change",
-  showPaymentInfo
-);
-
-
-showPaymentInfo();
-
-</script>
-
-
-
-<!-- =====================================================
-     MAIN APP
-===================================================== -->
-
-<script src="/app.js"></script>
-
+    document
+      .getElementById("trackingForm")
+      .addEventListener("submit", async function(e){
+
+        e.preventDefault();
+
+        const orderId =
+          document
+            .getElementById("trackingOrderId")
+            .value
+            .trim();
+
+        const phone =
+          document
+            .getElementById("trackingPhone")
+            .value
+            .trim();
+
+        const result =
+          document.getElementById("trackingResult");
+
+        result.style.display = "block";
+
+        result.innerHTML =
+          "<p>⏳ Checking order...</p>";
+
+        try{
+
+          const response =
+            await fetch(
+              "/api/order-status/" +
+              encodeURIComponent(orderId) +
+              "?phone=" +
+              encodeURIComponent(phone)
+            );
+
+          const data =
+            await response.json();
+
+          if(!response.ok){
+
+            result.innerHTML = `
+              <div
+                style="
+                  padding:18px;
+                  border-radius:12px;
+                  background:#fff0f0;
+                "
+              >
+                ❌
+                ${data.error || "Order not found."}
+              </div>
+            `;
+
+            return;
+
+          }
+
+          const status =
+            data.status || "Pending";
+
+          result.innerHTML = `
+
+            <div
+              style="
+                padding:22px;
+                border:1px solid #ddd;
+                border-radius:15px;
+                background:#fff;
+              "
+            >
+
+              <h3>
+                📦 Order #${data.id}
+              </h3>
+
+              <p>
+                <strong>Customer:</strong>
+                ${escapeHtml(data.customer_name)}
+              </p>
+
+              <p>
+                <strong>Total:</strong>
+                ৳${Number(data.total).toLocaleString("en-BD")}
+              </p>
+
+              <div
+                style="
+                  margin-top:15px;
+                  padding:15px;
+                  border-radius:12px;
+                  background:#f3f7f5;
+                  text-align:center;
+                "
+              >
+
+                <div style="font-size:13px;">
+                  ORDER STATUS
+                </div>
+
+                <strong
+                  style="
+                    display:block;
+                    font-size:25px;
+                    margin-top:5px;
+                  "
+                >
+                  ${escapeHtml(status)}
+                </strong>
+
+              </div>
+
+              <p style="margin-top:15px;">
+                ${
+                  status === "Pending"
+                  ? "⏳ Your order has been received and is waiting for confirmation."
+                  : status === "Confirmed"
+                  ? "✅ Your order has been confirmed by Grameen Shop."
+                  : status === "Packed"
+                  ? "📦 Your order has been packed."
+                  : status === "Shipped"
+                  ? "🚚 Your order is on the way."
+                  : status === "Delivered"
+                  ? "🎉 Your order has been delivered."
+                  : status === "Cancelled"
+                  ? "❌ This order has been cancelled."
+                  : ""
+                }
+              </p>
+
+            </div>
+
+          `;
+
+        }catch(error){
+
+          console.error(error);
+
+          result.innerHTML = `
+            <div
+              style="
+                padding:18px;
+                border-radius:12px;
+                background:#fff0f0;
+              "
+            >
+              ❌ Could not check order status.
+            </div>
+          `;
+
+        }
+
+      });
+
+
+    function escapeHtml(value){
+
+      return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+    }
+
+  </script>
+
+  <!-- MAIN JAVASCRIPT -->
+  <script src="/app.js"></script>
 
 </body>
 </html>
+```
