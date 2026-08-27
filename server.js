@@ -1,26 +1,21 @@
+```javascript
 const express = require("express");
 const session = require("express-session");
 const Database = require("better-sqlite3");
 const path = require("path");
 
 const app = express();
-
 const db = new Database("store.db");
 
 const PORT = process.env.PORT || 3000;
 
 
 /* =====================================================
-   MIDDLEWARE
+   BASIC CONFIG
 ===================================================== */
 
 app.use(express.json());
-
-app.use(
-  express.urlencoded({
-    extended: true
-  })
-);
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
@@ -29,7 +24,6 @@ app.use(
       "dev-secret-change-me",
 
     resave: false,
-
     saveUninitialized: false,
 
     cookie: {
@@ -51,59 +45,101 @@ app.use(
 ===================================================== */
 
 db.exec(`
-
 CREATE TABLE IF NOT EXISTS products(
-
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-
   name TEXT NOT NULL,
-
   category TEXT NOT NULL,
-
   price INTEGER NOT NULL,
-
   old_price INTEGER DEFAULT 0,
-
   icon TEXT DEFAULT '🛍️',
-
   stock INTEGER DEFAULT 0,
-
   active INTEGER DEFAULT 1,
-
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
-
 );
-
 
 CREATE TABLE IF NOT EXISTS orders(
-
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-
   customer_name TEXT NOT NULL,
-
   phone TEXT NOT NULL,
-
   address TEXT NOT NULL,
-
   payment TEXT NOT NULL,
-
   note TEXT,
-
   items_json TEXT NOT NULL,
-
   total INTEGER NOT NULL,
-
   status TEXT DEFAULT 'Pending',
-
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
-
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
-
 `);
 
 
 /* =====================================================
-   DEFAULT PRODUCTS
+   DATABASE MIGRATION
+   Adds updated_at to old databases
+===================================================== */
+
+try {
+
+  db.prepare(
+    "SELECT updated_at FROM orders LIMIT 1"
+  ).get();
+
+} catch (error) {
+
+  try {
+
+    db.exec(
+      "ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT CURRENT_TIMESTAMP"
+    );
+
+  } catch (e) {
+
+    console.log(
+      "updated_at migration:",
+      e.message
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   PAYMENT INFORMATION
+===================================================== */
+
+const PAYMENT_INFO = {
+
+  bkash: {
+    name: "bKash",
+    number: "01312376687",
+    type: "Merchant",
+    instruction:
+      "Send the payment to this bKash Merchant number and keep your Transaction ID."
+  },
+
+  nagad: {
+    name: "Nagad",
+    number: "01728376687",
+    type: "Personal",
+    instruction:
+      "Send the payment to this Nagad Personal number and keep your Transaction ID."
+  }
+
+};
+
+
+/* =====================================================
+   MONEY
+===================================================== */
+
+const money = n =>
+  "৳" +
+  Number(n).toLocaleString("en-BD");
+
+
+/* =====================================================
+   INITIAL PRODUCTS
 ===================================================== */
 
 const count =
@@ -127,12 +163,11 @@ if (!count) {
         icon,
         stock
       )
-      VALUES (?,?,?,?,?,?)
+      VALUES(?,?,?,?,?,?)
     `);
 
 
   [
-
     [
       "Classic Oversized T-Shirt",
       "Fashion",
@@ -205,22 +240,9 @@ if (!count) {
       14
     ]
 
-  ].forEach(x => {
-
-    add.run(...x);
-
-  });
+  ].forEach(x => add.run(...x));
 
 }
-
-
-/* =====================================================
-   MONEY
-===================================================== */
-
-const money = n =>
-  "৳" +
-  Number(n).toLocaleString("en-BD");
 
 
 /* =====================================================
@@ -241,8 +263,24 @@ app.get(
         `)
         .all();
 
-
     res.json(products);
+
+  }
+);
+
+
+/* =====================================================
+   PAYMENT INFO API
+===================================================== */
+
+app.get(
+  "/api/payment-info",
+  (req, res) => {
+
+    res.json({
+      ok: true,
+      payment: PAYMENT_INFO
+    });
 
   }
 );
@@ -256,113 +294,157 @@ app.post(
   "/api/orders",
   (req, res) => {
 
-    const {
-      customer_name,
-      phone,
-      address,
-      payment,
-      note,
-      items
-    } = req.body;
+    try {
+
+      const {
+        customer_name,
+        phone,
+        address,
+        payment,
+        note,
+        transaction_id,
+        items
+      } = req.body;
 
 
-    if (
-      !customer_name ||
-      !phone ||
-      !address ||
-      !payment ||
-      !Array.isArray(items) ||
-      !items.length
-    ) {
+      if (
+        !customer_name ||
+        !phone ||
+        !address ||
+        !payment ||
+        !Array.isArray(items) ||
+        !items.length
+      ) {
 
-      return res.status(400).json({
-        error:
-          "Please complete all required fields."
-      });
+        return res
+          .status(400)
+          .json({
+            error:
+              "Please complete all required fields."
+          });
 
-    }
-
-
-    let total = 0;
-
-    let normalized = [];
+      }
 
 
-    const get =
-      db.prepare(`
-        SELECT *
-        FROM products
-        WHERE id=?
-        AND active=1
-      `);
+      /* =================================================
+         PAYMENT VALIDATION
+      ================================================= */
+
+      if (
+        payment === "bKash Manual" &&
+        !transaction_id
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Please enter your bKash Transaction ID."
+          });
+
+      }
 
 
-    for (const i of items) {
+      if (
+        payment === "Nagad Manual" &&
+        !transaction_id
+      ) {
 
-      const p =
-        get.get(i.id);
+        return res
+          .status(400)
+          .json({
+            error:
+              "Please enter your Nagad Transaction ID."
+          });
+
+      }
 
 
-      const qty =
-        Math.max(
-          1,
-          Math.floor(
-            Number(i.qty) || 1
-          )
-        );
+      /* =================================================
+         CHECK PRODUCTS
+      ================================================= */
+
+      let total = 0;
+
+      const normalized = [];
 
 
-      if (!p) {
+      const get =
+        db.prepare(`
+          SELECT *
+          FROM products
+          WHERE id=?
+          AND active=1
+        `);
 
-        return res.status(400).json({
-          error:
-            "A product is unavailable."
+
+      for (const i of items) {
+
+        const p =
+          get.get(i.id);
+
+
+        const qty =
+          Math.max(
+            1,
+            Math.floor(
+              Number(i.qty) || 1
+            )
+          );
+
+
+        if (!p) {
+
+          return res
+            .status(400)
+            .json({
+              error:
+                "A product is unavailable."
+            });
+
+        }
+
+
+        if (p.stock < qty) {
+
+          return res
+            .status(400)
+            .json({
+              error:
+                `Only ${p.stock} units of ${p.name} are available.`
+            });
+
+        }
+
+
+        total +=
+          p.price * qty;
+
+
+        normalized.push({
+
+          id: p.id,
+
+          name: p.name,
+
+          price: p.price,
+
+          qty
+
         });
 
       }
 
 
-      if (p.stock < qty) {
+      /* =================================================
+         INSERT ORDER
+      ================================================= */
 
-        return res.status(400).json({
+      const tx =
+        db.transaction(() => {
 
-          error:
-            `Only ${p.stock} units of ${p.name} are available.`
-
-        });
-
-      }
-
-
-      total +=
-        p.price * qty;
-
-
-      normalized.push({
-
-        id: p.id,
-
-        name: p.name,
-
-        price: p.price,
-
-        qty
-
-      });
-
-    }
-
-
-    /* =================================================
-       DATABASE TRANSACTION
-    ================================================= */
-
-    const tx =
-      db.transaction(() => {
-
-        const info =
-          db
-            .prepare(`
+          const info =
+            db.prepare(`
               INSERT INTO orders
               (
                 customer_name,
@@ -371,174 +453,234 @@ app.post(
                 payment,
                 note,
                 items_json,
-                total
+                total,
+                status,
+                created_at,
+                updated_at
               )
-              VALUES (?,?,?,?,?,?,?)
+              VALUES(
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                'Pending',
+                CURRENT_TIMESTAMP,
+                CURRENT_TIMESTAMP
+              )
             `)
             .run(
-
               customer_name,
-
               phone,
-
               address,
-
               payment,
-
               note || "",
-
               JSON.stringify(
                 normalized
               ),
-
               total
-
             );
 
 
-        const upd =
-          db.prepare(`
-            UPDATE products
-            SET stock=stock-?
-            WHERE id=?
-          `);
+          const orderId =
+            info.lastInsertRowid;
 
 
-        normalized.forEach(i => {
+          /* STOCK UPDATE */
 
-          upd.run(
-            i.qty,
-            i.id
-          );
+          const upd =
+            db.prepare(`
+              UPDATE products
+              SET stock=stock-?
+              WHERE id=?
+            `);
+
+
+          normalized.forEach(i => {
+
+            upd.run(
+              i.qty,
+              i.id
+            );
+
+          });
+
+
+          return orderId;
 
         });
 
 
-        return info.lastInsertRowid;
+      const orderId = tx();
+
+
+      /* =================================================
+         RESPONSE
+      ================================================= */
+
+      res.json({
+
+        ok: true,
+
+        order_id: orderId,
+
+        total,
+
+        money: money(total),
+
+        status: "Pending",
+
+        payment,
+
+        message:
+          `Order #${orderId} received successfully. Your order status is Pending.`
 
       });
 
 
-    const id = tx();
+    } catch (error) {
 
+      console.error(
+        "ORDER ERROR:",
+        error
+      );
 
-    res.json({
+      res
+        .status(500)
+        .json({
+          error:
+            "Could not place order."
+        });
 
-      ok: true,
-
-      order_id: id,
-
-      total,
-
-      money: money(total)
-
-    });
+    }
 
   }
 );
 
 
 /* =====================================================
-   CUSTOMER ORDER TRACKING
+   CUSTOMER ORDER STATUS
 ===================================================== */
 
 app.get(
-  "/api/order/:id",
+  "/api/orders/:id",
   (req, res) => {
-
-    const id =
-      Number(req.params.id);
-
-
-    if (!Number.isInteger(id) || id < 1) {
-
-      return res.status(400).json({
-
-        error:
-          "Invalid Order ID."
-
-      });
-
-    }
-
-
-    const order =
-      db
-        .prepare(`
-          SELECT
-            id,
-            customer_name,
-            payment,
-            items_json,
-            total,
-            status,
-            created_at
-          FROM orders
-          WHERE id=?
-        `)
-        .get(id);
-
-
-    if (!order) {
-
-      return res.status(404).json({
-
-        error:
-          "Order not found."
-
-      });
-
-    }
-
-
-    let items = [];
-
 
     try {
 
-      items =
-        JSON.parse(
-          order.items_json
-        );
-
-    } catch {
-
-      items = [];
-
-    }
+      const orderId =
+        Number(req.params.id);
 
 
-    res.json({
+      const phone =
+        String(
+          req.query.phone || ""
+        ).trim();
 
-      ok: true,
 
-      order: {
+      if (!orderId || !phone) {
 
-        id: order.id,
-
-        customer_name:
-          order.customer_name,
-
-        payment:
-          order.payment,
-
-        items,
-
-        total:
-          order.total,
-
-        money:
-          money(order.total),
-
-        status:
-          order.status,
-
-        created_at:
-          order.created_at
+        return res
+          .status(400)
+          .json({
+            error:
+              "Order ID and phone number are required."
+          });
 
       }
 
-    });
+
+      const order =
+        db
+          .prepare(`
+            SELECT *
+            FROM orders
+            WHERE id=?
+            AND phone=?
+          `)
+          .get(
+            orderId,
+            phone
+          );
+
+
+      if (!order) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Order not found. Please check your Order ID and phone number."
+          });
+
+      }
+
+
+      res.json({
+
+        ok: true,
+
+        order: {
+
+          id: order.id,
+
+          customer_name:
+            order.customer_name,
+
+          phone:
+            order.phone,
+
+          address:
+            order.address,
+
+          payment:
+            order.payment,
+
+          transaction_id:
+            order.transaction_id || "",
+
+          total:
+            order.total,
+
+          money:
+            money(order.total),
+
+          status:
+            order.status,
+
+          items:
+            JSON.parse(
+              order.items_json
+            ),
+
+          created_at:
+            order.created_at,
+
+          updated_at:
+            order.updated_at
+
+        }
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "STATUS ERROR:",
+        error
+      );
+
+      res
+        .status(500)
+        .json({
+          error:
+            "Could not check order status."
+        });
+
+    }
 
   }
 );
@@ -555,6 +697,7 @@ function admin(
 ) {
 
   if (
+    req.session &&
     req.session.admin
   ) {
 
@@ -563,12 +706,12 @@ function admin(
   }
 
 
-  res.status(401).json({
-
-    error:
-      "Admin login required."
-
-  });
+  res
+    .status(401)
+    .json({
+      error:
+        "Admin login required."
+    });
 
 }
 
@@ -606,12 +749,12 @@ app.post(
     }
 
 
-    res.status(401).json({
-
-      error:
-        "Invalid login."
-
-    });
+    res
+      .status(401)
+      .json({
+        error:
+          "Invalid login."
+      });
 
   }
 );
@@ -626,13 +769,10 @@ app.post(
   (req, res) => {
 
     req.session.destroy(
-      () => {
-
+      () =>
         res.json({
           ok: true
-        });
-
-      }
+        })
     );
 
   }
@@ -640,7 +780,7 @@ app.post(
 
 
 /* =====================================================
-   ADMIN SESSION CHECK
+   ADMIN SESSION
 ===================================================== */
 
 app.get(
@@ -650,7 +790,10 @@ app.get(
     res.json({
 
       loggedIn:
-        !!req.session.admin
+        !!(
+          req.session &&
+          req.session.admin
+        )
 
     });
 
@@ -722,58 +865,73 @@ app.patch(
     ];
 
 
+    const newStatus =
+      req.body.status;
+
+
     if (
       !allowed.includes(
-        req.body.status
+        newStatus
       )
     ) {
 
-      return res.status(400).json({
-
-        error:
-          "Invalid status"
-
-      });
+      return res
+        .status(400)
+        .json({
+          error:
+            "Invalid status."
+        });
 
     }
 
 
-    const result =
+    const order =
       db
-        .prepare(`
-          UPDATE orders
-          SET status=?
-          WHERE id=?
-        `)
-        .run(
-
-          req.body.status,
-
+        .prepare(
+          "SELECT * FROM orders WHERE id=?"
+        )
+        .get(
           req.params.id
-
         );
 
 
-    if (
-      result.changes === 0
-    ) {
+    if (!order) {
 
-      return res.status(404).json({
-
-        error:
-          "Order not found."
-
-      });
+      return res
+        .status(404)
+        .json({
+          error:
+            "Order not found."
+        });
 
     }
+
+
+    db.prepare(`
+      UPDATE orders
+      SET
+        status=?,
+        updated_at=CURRENT_TIMESTAMP
+      WHERE id=?
+    `)
+    .run(
+      newStatus,
+      req.params.id
+    );
 
 
     res.json({
 
       ok: true,
 
+      order_id:
+        Number(req.params.id),
+
       status:
-        req.body.status
+        newStatus,
+
+      message:
+        `Order #${req.params.id} status changed to ${newStatus}.`
 
     });
 
@@ -806,46 +964,37 @@ app.post(
       !price
     ) {
 
-      return res.status(400).json({
-
-        error:
-          "Name, category and price are required."
-
-      });
+      return res
+        .status(400)
+        .json({
+          error:
+            "Name, category and price are required."
+        });
 
     }
 
 
     const r =
-      db
-        .prepare(`
-          INSERT INTO products
-          (
-            name,
-            category,
-            price,
-            old_price,
-            icon,
-            stock
-          )
-          VALUES (?,?,?,?,?,?)
-        `)
-        .run(
-
+      db.prepare(`
+        INSERT INTO products
+        (
           name,
-
           category,
-
-          Number(price),
-
-          Number(old_price) || 0,
-
-          icon ||
-            "🛍️",
-
-          Number(stock) || 0
-
-        );
+          price,
+          old_price,
+          icon,
+          stock
+        )
+        VALUES(?,?,?,?,?,?)
+      `)
+      .run(
+        name,
+        category,
+        price,
+        old_price || 0,
+        icon || "🛍️",
+        stock || 0
+      );
 
 
     res.json({
@@ -872,11 +1021,9 @@ app.patch(
 
     const p =
       db
-        .prepare(`
-          SELECT *
-          FROM products
-          WHERE id=?
-        `)
+        .prepare(
+          "SELECT * FROM products WHERE id=?"
+        )
         .get(
           req.params.id
         );
@@ -884,12 +1031,12 @@ app.patch(
 
     if (!p) {
 
-      return res.status(404).json({
-
-        error:
-          "Not found"
-
-      });
+      return res
+        .status(404)
+        .json({
+          error:
+            "Product not found."
+        });
 
     }
 
@@ -903,45 +1050,41 @@ app.patch(
     };
 
 
-    db
-      .prepare(`
-        UPDATE products
-        SET
-          name=?,
-          category=?,
-          price=?,
-          old_price=?,
-          icon=?,
-          stock=?,
-          active=?
-        WHERE id=?
-      `)
-      .run(
+    db.prepare(`
+      UPDATE products
+      SET
+        name=?,
+        category=?,
+        price=?,
+        old_price=?,
+        icon=?,
+        stock=?,
+        active=?
+      WHERE id=?
+    `)
+    .run(
 
-        x.name,
+      x.name,
 
-        x.category,
+      x.category,
 
-        Number(x.price),
+      x.price,
 
-        Number(x.old_price) || 0,
+      x.old_price || 0,
 
-        x.icon ||
-          "🛍️",
+      x.icon || "🛍️",
 
-        Number(x.stock) || 0,
+      x.stock || 0,
 
-        x.active ? 1 : 0,
+      x.active ? 1 : 0,
 
-        req.params.id
+      req.params.id
 
-      );
+    );
 
 
     res.json({
-
       ok: true
-
     });
 
   }
@@ -957,36 +1100,18 @@ app.delete(
   admin,
   (req, res) => {
 
-    const result =
-      db
-        .prepare(`
-          UPDATE products
-          SET active=0
-          WHERE id=?
-        `)
-        .run(
-          req.params.id
-        );
-
-
-    if (
-      result.changes === 0
-    ) {
-
-      return res.status(404).json({
-
-        error:
-          "Product not found."
-
-      });
-
-    }
+    db.prepare(`
+      UPDATE products
+      SET active=0
+      WHERE id=?
+    `)
+    .run(
+      req.params.id
+    );
 
 
     res.json({
-
       ok: true
-
     });
 
   }
@@ -1002,8 +1127,9 @@ app.listen(
   () => {
 
     console.log(
-      `Parvez Shop running on http://localhost:${PORT}`
+      `Grameen Shop running on http://localhost:${PORT}`
     );
 
   }
 );
+```
